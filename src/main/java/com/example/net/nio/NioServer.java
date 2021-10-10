@@ -36,7 +36,8 @@ public class NioServer {
                 iterator.remove();
                 // 5. 区分事件类型
                 if (key.isAcceptable()) {  // 如果是 accept
-                    SocketChannel sc = (SocketChannel) key.channel();
+                    ServerSocketChannel serverSocketChannel = (ServerSocketChannel) key.channel();
+                    SocketChannel sc = serverSocketChannel.accept();
                     sc.configureBlocking(false);
                     ByteBuffer buffer = ByteBuffer.allocate(16); // attachment
                     // 将一个 byteBuffer 作为附件关联到 selectionKey 上
