@@ -1,52 +1,48 @@
-package com.example.net.netty.msg;
+package com.example.net.netty.msg.basic;
 
-import io.netty.bootstrap.Bootstrap;
-import io.netty.buffer.ByteBuf;
+import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.logging.LogLevel;
+import io.netty.handler.logging.LoggingHandler;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class HelloClient {
+public class HelloServer {
 
     public static void main(String[] args) {
-        for (int i = 0; i < 10; i++) {
-            send();
-        }
-        log.info("finish");
-    }
-
-    private static void send() {
+        NioEventLoopGroup boss = new NioEventLoopGroup();
         NioEventLoopGroup worker = new NioEventLoopGroup();
+
         try {
-            Bootstrap bootstrap = new Bootstrap();
-            bootstrap.group(worker)
-                    .channel(NioSocketChannel.class)
-                    .handler(new ChannelInitializer<SocketChannel>() {
+            ServerBootstrap serverBootstrap = new ServerBootstrap();
+            serverBootstrap.group(boss,worker)
+                    .channel(NioServerSocketChannel.class)
+                    .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         protected void initChannel(SocketChannel ch) throws Exception {
+                            ch.pipeline().addLast(new LoggingHandler(LogLevel.INFO));
                             ch.pipeline().addLast(new ChannelInboundHandlerAdapter() {
                                 @Override
                                 public void channelActive(ChannelHandlerContext ctx) throws Exception {
-                                    ByteBuf buf = ctx.alloc().buffer();
-                                    buf.writeBytes(new byte[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15});
-                                    ctx.writeAndFlush(buf);
-                                    ctx.close();
+                                    log.info("connected {}",ctx.channel());
+                                    super.channelActive(ctx);
                                 }
                             });
                         }
                     });
 
-            ChannelFuture future = bootstrap.connect("localhost", 8080).sync();
+            ChannelFuture future = serverBootstrap.bind(8080).sync();
             future.channel().closeFuture().sync();
         } catch (InterruptedException e) {
             e.printStackTrace();
         } finally {
+            boss.shutdownGracefully();
             worker.shutdownGracefully();
         }
     }
