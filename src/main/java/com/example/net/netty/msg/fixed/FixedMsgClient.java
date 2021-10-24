@@ -34,11 +34,11 @@ public class FixedMsgClient {
                     .channel(NioSocketChannel.class)
                     .handler(new ChannelInitializer<SocketChannel>() {
                         @Override
-                        protected void initChannel(SocketChannel ch) throws Exception {
+                        protected void initChannel(SocketChannel ch) {
                             ch.pipeline().addLast(new LoggingHandler(LogLevel.INFO));
                             ch.pipeline().addLast(new ChannelInboundHandlerAdapter() {
                                 @Override
-                                public void channelActive(ChannelHandlerContext ctx) throws Exception {
+                                public void channelActive(ChannelHandlerContext ctx) {
                                     log.info("sending.......");
                                     Random random = new Random();
                                     char c = 'a';

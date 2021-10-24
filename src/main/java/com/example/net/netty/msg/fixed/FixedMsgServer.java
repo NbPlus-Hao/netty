@@ -19,10 +19,9 @@ public class FixedMsgServer {
     public static void main(String[] args) {
         NioEventLoopGroup boss = new NioEventLoopGroup();
         NioEventLoopGroup worker = new NioEventLoopGroup();
-
         try {
             ServerBootstrap serverBootstrap = new ServerBootstrap();
-            serverBootstrap.group(boss,worker)
+            serverBootstrap.group(boss, worker)
                     .channel(NioServerSocketChannel.class)
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
@@ -32,17 +31,16 @@ public class FixedMsgServer {
                             ch.pipeline().addLast(new ChannelInboundHandlerAdapter() {
                                 @Override
                                 public void channelActive(ChannelHandlerContext ctx) throws Exception {
-                                    log.info("connected {}",ctx.channel());
+                                    log.info("connected {}", ctx.channel());
                                     super.channelActive(ctx);
                                 }
                             });
                         }
                     });
-
             ChannelFuture future = serverBootstrap.bind(8080).sync();
             future.channel().closeFuture().sync();
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            log.error("server error", e);
         } finally {
             boss.shutdownGracefully();
             worker.shutdownGracefully();
