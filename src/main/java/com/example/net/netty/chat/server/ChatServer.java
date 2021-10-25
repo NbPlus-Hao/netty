@@ -1,16 +1,12 @@
 package com.example.net.netty.chat.server;
 
-import com.example.net.netty.chat.message.LoginRequestMessage;
-import com.example.net.netty.chat.message.LoginResponseMessage;
+import com.example.net.netty.chat.handler.ChatRequestMessageHandler;
+import com.example.net.netty.chat.handler.LoginRequestMessageHandler;
 import com.example.net.netty.chat.protocol.MessageCodecSharable;
 import com.example.net.netty.chat.protocol.ProtocolFrameDecoder;
-import com.example.net.netty.chat.server.service.UserService;
-import com.example.net.netty.chat.server.service.UserServiceFactory;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
-import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
@@ -36,23 +32,8 @@ public class ChatServer {
                             ch.pipeline().addLast(new ProtocolFrameDecoder());
 //                            ch.pipeline().addLast(logger);
                             ch.pipeline().addLast(messageCodec);
-                            ch.pipeline().addLast(new SimpleChannelInboundHandler<LoginRequestMessage>() {
-                                @Override
-                                protected void channelRead0(ChannelHandlerContext ctx, LoginRequestMessage msg) throws Exception {
-                                    String username = msg.getUsername();
-                                    String password = msg.getPassword();
-                                    log.info("用户名：{}  密码：{}", username, password);
-                                    UserService userService = UserServiceFactory.getUserService();
-                                    boolean isLogin = userService.login(username, password);
-                                    LoginResponseMessage message;
-                                    if (isLogin) {
-                                        message = new LoginResponseMessage(true, "登录成功");
-                                    } else {
-                                        message = new LoginResponseMessage(false, "用户名或密码错误");
-                                    }
-                                    ctx.writeAndFlush(message);
-                                }
-                            });
+                            ch.pipeline().addLast(new LoginRequestMessageHandler());
+                            ch.pipeline().addLast(new ChatRequestMessageHandler());
                         }
                     });
 
