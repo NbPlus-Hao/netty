@@ -19,6 +19,6 @@ public class UserServiceMemoryImpl implements UserService {
         if (pass == null) {
             return false;
         }
-        return pass.equals(allUserMap.get(username));
+        return pass.equals(password);
     }
 }

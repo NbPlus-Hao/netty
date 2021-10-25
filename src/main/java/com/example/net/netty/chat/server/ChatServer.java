@@ -34,7 +34,7 @@ public class ChatServer {
                         @Override
                         protected void initChannel(SocketChannel ch) throws Exception {
                             ch.pipeline().addLast(new ProtocolFrameDecoder());
-                            ch.pipeline().addLast(logger);
+//                            ch.pipeline().addLast(logger);
                             ch.pipeline().addLast(messageCodec);
                             ch.pipeline().addLast(new SimpleChannelInboundHandler<LoginRequestMessage>() {
                                 @Override
